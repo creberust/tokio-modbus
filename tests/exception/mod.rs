@@ -1,8 +1,6 @@
 // SPDX-FileCopyrightText: Copyright (c) 2017-2024 slowtec GmbH <post@slowtec.de>
 // SPDX-License-Identifier: MIT OR Apache-2.0
 
-use std::future;
-
 use tokio_modbus::{
     client::{Context, Reader, Writer},
     server::Service,
@@ -30,13 +28,12 @@ impl TestService {
     }
 }
 
+#[async_trait::async_trait]
 impl Service for TestService {
     type Request = Request<'static>;
 
-    type Future = future::Ready<Result<Response, Exception>>;
-
-    fn call(&self, req: Self::Request) -> Self::Future {
-        future::ready(self.handle(req))
+    async fn call(&self, req: Self::Request) -> Result<Response, Exception> {
+        self.handle(req)
     }
 }
 

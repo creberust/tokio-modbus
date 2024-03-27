@@ -206,7 +206,7 @@ mod tests {
 
     use crate::{prelude::*, server::Service};
 
-    use std::{future, sync::Arc};
+    use std::sync::Arc;
 
     #[tokio::test]
     async fn delegate_service_through_deref_for_server() {
@@ -215,12 +215,12 @@ mod tests {
             response: Response,
         }
 
+        #[async_trait::async_trait]
         impl Service for DummyService {
             type Request = Request<'static>;
-            type Future = future::Ready<Result<Response, Exception>>;
 
-            fn call(&self, _: Self::Request) -> Self::Future {
-                future::ready(Ok(self.response.clone()))
+            async fn call(&self, _: Self::Request) -> Result<Response, Exception> {
+                Ok(self.response.clone())
             }
         }
 
@@ -248,12 +248,12 @@ mod tests {
             response: Response,
         }
 
+        #[async_trait::async_trait]
         impl Service for DummyService {
             type Request = Request<'static>;
-            type Future = future::Ready<Result<Response, Exception>>;
 
-            fn call(&self, _: Self::Request) -> Self::Future {
-                future::ready(Ok(self.response.clone()))
+            async fn call(&self, _: Self::Request) -> Result<Response, Exception> {
+                Ok(self.response.clone())
             }
         }
 

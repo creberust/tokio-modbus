@@ -3,7 +3,7 @@
 
 //! RTU server example with slave address filtering and optional response
 
-use std::{future, thread, time::Duration};
+use std::{thread, time::Duration};
 
 use tokio_modbus::{prelude::*, server::rtu::Server};
 
@@ -11,21 +11,21 @@ struct Service {
     slave: Slave,
 }
 
+#[async_trait::async_trait]
 impl tokio_modbus::server::Service for Service {
     type Request = SlaveRequest<'static>;
-    type Future = future::Ready<Result<Response, Exception>>;
 
-    fn call(&self, req: Self::Request) -> Self::Future {
+    async fn call(&self, req: Self::Request) -> Result<Response, Exception> {
         if req.slave != self.slave.into() {
-            return future::ready(Err(Exception::IllegalFunction));
+            return Err(Exception::IllegalFunction);
         }
         match req.request {
             Request::ReadInputRegisters(_addr, cnt) => {
                 let mut registers = vec![0; cnt.into()];
                 registers[2] = 0x77;
-                future::ready(Ok(Response::ReadInputRegisters(registers)))
+                Ok(Response::ReadInputRegisters(registers))
             }
-            _ => future::ready(Err(Exception::IllegalFunction)),
+            _ => Err(Exception::IllegalFunction),
         }
     }
 }

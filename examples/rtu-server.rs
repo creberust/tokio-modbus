@@ -3,26 +3,24 @@
 
 //! RTU server example
 
-use std::{future, thread, time::Duration};
+use std::{thread, time::Duration};
 
 use tokio_modbus::{prelude::*, server::rtu::Server};
 
 struct Service;
 
+#[async_trait::async_trait]
 impl tokio_modbus::server::Service for Service {
     type Request = SlaveRequest<'static>;
-    type Future = future::Ready<Result<Response, Exception>>;
 
-    fn call(&self, req: Self::Request) -> Self::Future {
+    async fn call(&self, req: Self::Request) -> Result<Response, Exception> {
         match req.request {
             Request::ReadInputRegisters(_addr, cnt) => {
                 let mut registers = vec![0; cnt.into()];
                 registers[2] = 0x77;
-                future::ready(Ok(Response::ReadInputRegisters(registers)))
+                Ok(Response::ReadInputRegisters(registers))
             }
-            Request::ReadHoldingRegisters(_, _) => {
-                future::ready(Err(Exception::IllegalDataAddress))
-            }
+            Request::ReadHoldingRegisters(_, _) => Err(Exception::IllegalDataAddress),
             _ => unimplemented!(),
         }
     }
